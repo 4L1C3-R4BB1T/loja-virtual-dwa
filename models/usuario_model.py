@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import date
 from typing import Optional
 
@@ -14,6 +14,13 @@ class Usuario:
     email: Optional[str] = None
     perfil: Optional[int] = None
     senha: Optional[str] = None
-    # usar o campo abaixo somente se 
+    # usar o campo abaixo somente se
     # for autenticação por cookie
     token: Optional[str] = None
+
+
+    def to_dict(self):
+        data = asdict(self)
+        data.pop("senha", None)
+        data.pop("token", None)
+        return data

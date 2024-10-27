@@ -8,18 +8,15 @@ from dtos.inserir_usuario_dto import InserirUsuarioDTO
 from models.usuario_model import Usuario
 from repositories.usuario_repo import UsuarioRepo
 from repositories.produto_repo import ProdutoRepo
-from util.auth_jwt import (
-    conferir_senha,
-    criar_token,
-    obter_hash_senha,
-)
+from util.auth_jwt import (conferir_senha, criar_token, obter_hash_senha)
 
 from util.cookies import TEMPO_COOKIE_AUTH, adicionar_cookie_auth, adicionar_mensagem_sucesso
 from util.pydantic import create_validation_errors
 from util.templates import obter_jinja_templates
 
 
-router = APIRouter(include_in_schema=False)
+router = APIRouter(tags=["Principal"], include_in_schema=False)
+
 templates = obter_jinja_templates("templates/main")
 
 
@@ -76,10 +73,7 @@ async def get_cadastro_realizado(request: Request):
 
 
 @router.get("/entrar")
-async def get_entrar(
-    request: Request,
-    return_url: str = Query("/"),
-):
+async def get_entrar(request: Request, return_url: str = Query("/")):
     return templates.TemplateResponse(
         "pages/entrar.html",
         {
@@ -133,13 +127,7 @@ async def get_produto(request: Request, id: int):
 
 
 @router.get("/buscar")
-async def get_buscar(
-    request: Request,
-    q: str,
-    p: int = 1,
-    tp: int = 6,
-    o: int = 1,
-):
+async def get_buscar(request: Request, q: str, p: int = 1, tp: int = 6, o: int = 1):
     produtos = ProdutoRepo.obter_busca(q, p, tp, o)
     qtde_produtos = ProdutoRepo.obter_quantidade_busca(q)
     qtde_paginas = math.ceil(qtde_produtos / float(tp))

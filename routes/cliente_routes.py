@@ -18,11 +18,12 @@ from util.cookies import (
     adicionar_mensagem_alerta,
     adicionar_mensagem_erro,
     adicionar_mensagem_sucesso,
-    excluir_cookie_auth,
+    excluir_cookie_auth
 )
 from util.templates import obter_jinja_templates
 
-router = APIRouter(prefix="/cliente", include_in_schema=False)
+router = APIRouter(prefix="/cliente", tags=["Cliente"], include_in_schema=False)
+
 templates = obter_jinja_templates("templates/cliente")
 
 
@@ -212,20 +213,14 @@ async def get_pagamento(request: Request, id_pedido: int = Path(...)):
 
 
 @router.get("/mp/sucesso/{id_pedido:int}", response_class=HTMLResponse)
-async def get_mp_sucesso(
-    request: Request,
-    id_pedido: int = Path(...),
-):
+async def get_mp_sucesso(request: Request, id_pedido: int = Path(...)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
     PedidoRepo.alterar_estado(id_pedido, EstadoPedido.PAGO.value)
     return RedirectResponse(f"/cliente/pedidoconfirmado/{id_pedido}")
 
 
 @router.get("/mp/falha/{id_pedido:int}", response_class=HTMLResponse)
-async def get_mp_falha(
-    request: Request,
-    id_pedido: int = Path(...),
-):
+async def get_mp_falha(request: Request, id_pedido: int = Path(...)):
     response = RedirectResponse(f"/cliente/detalhespedido/{id_pedido}")
     adicionar_mensagem_erro(
         response,
@@ -235,10 +230,7 @@ async def get_mp_falha(
 
 
 @router.get("/mp/pendente/{id_pedido:int}", response_class=HTMLResponse)
-async def get_mp_pendente(
-    request: Request,
-    id_pedido: int = Path(...),
-):
+async def get_mp_pendente(request: Request, id_pedido: int = Path(...)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
     PedidoRepo.alterar_estado(id_pedido, EstadoPedido.PAGO.value)
     return RedirectResponse(f"/cliente/detalhespedido/{id_pedido}")
@@ -375,10 +367,7 @@ async def post_remover_item(request: Request, id_produto: int = Form(0)):
 
 
 @router.get("/pedidoconfirmado/{id_pedido:int}", response_class=HTMLResponse)
-async def get_pedidoconfirmado(
-    request: Request,
-    id_pedido: int = Path(...),
-):
+async def get_pedidoconfirmado(request: Request, id_pedido: int = Path(...)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
     if pedido.id_cliente != request.state.usuario.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -390,10 +379,7 @@ async def get_pedidoconfirmado(
 
 
 @router.get("/detalhespedido/{id_pedido:int}", response_class=HTMLResponse)
-async def get_detalhespedido(
-    request: Request,
-    id_pedido: int = Path(...),
-):
+async def get_detalhespedido(request: Request, id_pedido: int = Path(...)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
     if pedido.id_cliente != request.state.usuario.id:
         response = RedirectResponse(url="/pedidos", status_code=status.HTTP_302_FOUND)

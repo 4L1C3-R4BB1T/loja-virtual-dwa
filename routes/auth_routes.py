@@ -7,7 +7,7 @@ from repositories.usuario_repo import UsuarioRepo
 from util.auth_jwt import conferir_senha, criar_token
 
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["Login"])
 
 
 @router.post("/entrar")
