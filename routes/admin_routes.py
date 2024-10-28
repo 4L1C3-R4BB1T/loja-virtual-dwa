@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import asdict
 from fastapi import APIRouter, Path
 from fastapi.responses import JSONResponse
 
@@ -107,8 +108,12 @@ async def obter_pedidos_por_estado(estado: EstadoPedido = Path(..., title="Estad
 @router.get("/obter_usuarios")
 async def obter_usuarios():
     await asyncio.sleep(1)
-    usuarios = UsuarioRepo.obter_todos()
-    return [usuario.to_dict() for usuario in usuarios]
+    usuarios = UsuarioRepo.obter_todos_por_perfil()
+    usuarios = [
+        {key: value for key, value in vars(usuario).items() if key not in {"perfil", "senha", "token"}}
+        for usuario in usuarios
+    ]
+    return usuarios
 
 
 @router.post("/excluir_usuario", status_code=204)
