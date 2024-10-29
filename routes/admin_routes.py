@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import asdict
 from fastapi import APIRouter, Path
 from fastapi.responses import JSONResponse
 
@@ -35,40 +34,68 @@ async def inserir_produto(inputDto: InserirProdutoDto) -> Produto:
 
 @router.post("/excluir_produto", status_code=204)
 async def excluir_produto(inputDto: IdProdutoDto):
-    if ProdutoRepo.excluir(inputDto.id_produto): return None
-    pd = ProblemDetailsDto("int", f"O produto com id <b>{inputDto.id_produto}</b> não foi encontrado.", "value_not_found", ["body", "id_produto"])
+    if ProdutoRepo.excluir(inputDto.id_produto):
+        return None
+    pd = ProblemDetailsDto(
+        "int",
+        f"O produto com id <b>{inputDto.id_produto}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id_produto"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.get("/obter_produto/{id_produto}")
 async def obter_produto(id_produto: int = Path(..., title="Id do Produto", ge=1)):
     produto = ProdutoRepo.obter_um(id_produto)
-    if produto: return produto
-    pd = ProblemDetailsDto("int", f"O produto com id <b>{id_produto}</b> não foi encontrado.", "value_not_found", ["body", "id_produto"])
+    if produto:
+        return produto
+    pd = ProblemDetailsDto(
+        "int",
+        f"O produto com id <b>{id_produto}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id_produto"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.post("/alterar_produto", status_code=204)
 async def alterar_produto(inputDto: AlterarProdutoDto):
     produto = Produto(inputDto.id, inputDto.nome, inputDto.preco, inputDto.descricao, inputDto.estoque)
-    if ProdutoRepo.alterar(produto): return None
-    pd = ProblemDetailsDto("int", f"O produto com id <b>{inputDto.id}</b> não foi encontrado.", "value_not_found", ["body", "id"])
+    if ProdutoRepo.alterar(produto):
+        return None
+    pd = ProblemDetailsDto(
+        "int",
+        f"O produto com id <b>{inputDto.id}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.post("/alterar_pedido", status_code=204)
 async def alterar_pedido(inputDto: AlterarPedidoDto):
-    if PedidoRepo.alterar_estado(inputDto.id, inputDto.estado.value): 
+    if PedidoRepo.alterar_estado(inputDto.id, inputDto.estado.value):
         return None
-    pd = ProblemDetailsDto("int", f"O pedido com id <b>{inputDto.id}</b> não foi encontrado.", "value_not_found", ["body", "id"])
+    pd = ProblemDetailsDto(
+        "int",
+        f"O pedido com id <b>{inputDto.id}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.post("/cancelar_pedido/{id_pedido}", status_code=204)
 async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)):
-    if PedidoRepo.alterar_estado(id_pedido, EstadoPedido.CANCELADO.value): 
+    if PedidoRepo.alterar_estado(id_pedido, EstadoPedido.CANCELADO.value):
         return None
-    pd = ProblemDetailsDto("int", f"O pedido com id <b>{id_pedido}</b> não foi encontrado.", "value_not_found", ["body", "id"])
+    pd = ProblemDetailsDto(
+        "int",
+        f"O pedido com id <b>{id_pedido}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
@@ -76,7 +103,12 @@ async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)
 async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
     if not pedido:
-        pd = ProblemDetailsDto("int", f"O pedido com id <b>{id_pedido}</b> não foi encontrado.", "value_not_found", ["body", "id"])
+        pd = ProblemDetailsDto(
+            "int",
+            f"O pedido com id <b>{id_pedido}</b> não foi encontrado.",
+            "value_not_found",
+            ["body", "id"],
+        )
         return JSONResponse(pd.to_dict(), status_code=404)
     estado_atual = pedido.estado
     estados = [e.value for e in list(EstadoPedido) if e != EstadoPedido.CANCELADO]
@@ -84,22 +116,33 @@ async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)
     indice += 1
     if indice < len(estados):
         novo_estado = estados[indice]
-        if PedidoRepo.alterar_estado(id_pedido, novo_estado): 
+        if PedidoRepo.alterar_estado(id_pedido, novo_estado):
             return None
-    pd = ProblemDetailsDto("int", f"O pedido com id <b>{id_pedido}</b> não pode ter seu estado evoluído para <b>cancelado</b>.", "state_change_invalid", ["body", "id"])
+    pd = ProblemDetailsDto(
+        "int",
+        f"O pedido com id <b>{id_pedido}</b> não pode ter seu estado evoluído para <b>cancelado</b>.",
+        "state_change_invalid",
+        ["body", "id"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.get("/obter_pedido/{id_pedido}")
 async def obter_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
-    if pedido: return pedido
-    pd = ProblemDetailsDto("int", f"O pedido com id <b>{id_pedido}</b> não foi encontrado.", "value_not_found", ["body", "id"])
+    if pedido:
+        return pedido
+    pd = ProblemDetailsDto(
+        "int",
+        f"O pedido com id <b>{id_pedido}</b> não foi encontrado.",
+        "value_not_found",
+        ["body", "id"],
+    )
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
 @router.get("/obter_pedidos_por_estado/{estado}")
-async def obter_pedidos_por_estado(estado: EstadoPedido = Path(..., title="Estado do Pedido")):    
+async def obter_pedidos_por_estado(estado: EstadoPedido = Path(..., title="Estado do Pedido")):
     await asyncio.sleep(1)
     pedidos = PedidoRepo.obter_todos_por_estado(estado.value)
     return pedidos
@@ -109,6 +152,7 @@ async def obter_pedidos_por_estado(estado: EstadoPedido = Path(..., title="Estad
 async def obter_usuarios():
     await asyncio.sleep(1)
     usuarios = UsuarioRepo.obter_todos_por_perfil()
+    #  remover do retorno campos nulos
     usuarios = [
         {key: value for key, value in vars(usuario).items() if key not in {"perfil", "senha", "token"}}
         for usuario in usuarios
