@@ -8,8 +8,10 @@ from dtos.id_produto_dto import IdProdutoDto
 from dtos.id_usuario_dto import IdUsuarioDto
 from dtos.inserir_produto_dto import InserirProdutoDto
 from dtos.problem_details_dto import ProblemDetailsDto
+from models.detalhes_pedido_model import DetalhesPedido
 from models.pedido_model import EstadoPedido
 from models.produto_model import Produto
+from repositories.item_pedido_repo import ItemPedidoRepo
 from repositories.pedido_repo import PedidoRepo
 from repositories.produto_repo import ProdutoRepo
 from repositories.usuario_repo import UsuarioRepo
@@ -130,8 +132,19 @@ async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)
 @router.get("/obter_pedido/{id_pedido}")
 async def obter_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
+
     if pedido:
-        return pedido
+        cliente = UsuarioRepo.obter_por_id(pedido.id_cliente)
+        itens = ItemPedidoRepo.obter_por_pedido(pedido.id)
+        detalhes_pedido = DetalhesPedido(
+            id=pedido.id,
+            data_hora=pedido.data_hora,
+            valor_total=pedido.valor_total,
+            estado=pedido.estado, 
+            cliente=cliente, 
+            itens=itens
+        )
+        return detalhes_pedido
     pd = ProblemDetailsDto(
         "int",
         f"O pedido com id <b>{id_pedido}</b> não foi encontrado.",
