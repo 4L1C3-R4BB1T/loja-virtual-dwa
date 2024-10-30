@@ -8,7 +8,6 @@ from dtos.id_produto_dto import IdProdutoDto
 from dtos.id_usuario_dto import IdUsuarioDto
 from dtos.inserir_produto_dto import InserirProdutoDto
 from dtos.problem_details_dto import ProblemDetailsDto
-from models.detalhes_pedido_model import DetalhesPedido
 from models.pedido_model import EstadoPedido
 from models.produto_model import Produto
 from repositories.item_pedido_repo import ItemPedidoRepo
@@ -49,6 +48,7 @@ async def excluir_produto(inputDto: IdProdutoDto):
 
 @router.get("/obter_produto/{id_produto}")
 async def obter_produto(id_produto: int = Path(..., title="Id do Produto", ge=1)):
+    await asyncio.sleep(1)
     produto = ProdutoRepo.obter_um(id_produto)
     if produto:
         return produto
@@ -132,19 +132,12 @@ async def cancelar_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)
 @router.get("/obter_pedido/{id_pedido}")
 async def obter_pedido(id_pedido: int = Path(..., title="Id do Pedido", ge=1)):
     pedido = PedidoRepo.obter_por_id(id_pedido)
-
     if pedido:
         cliente = UsuarioRepo.obter_por_id(pedido.id_cliente)
         itens = ItemPedidoRepo.obter_por_pedido(pedido.id)
-        detalhes_pedido = DetalhesPedido(
-            id=pedido.id,
-            data_hora=pedido.data_hora,
-            valor_total=pedido.valor_total,
-            estado=pedido.estado, 
-            cliente=cliente, 
-            itens=itens
-        )
-        return detalhes_pedido
+        pedido.cliente = cliente
+        pedido.itens = itens
+        return pedido
     pd = ProblemDetailsDto(
         "int",
         f"O pedido com id <b>{id_pedido}</b> não foi encontrado.",
@@ -165,11 +158,6 @@ async def obter_pedidos_por_estado(estado: EstadoPedido = Path(..., title="Estad
 async def obter_usuarios():
     await asyncio.sleep(1)
     usuarios = UsuarioRepo.obter_todos_por_perfil()
-    #  remover do retorno campos nulos
-    usuarios = [
-        {key: value for key, value in vars(usuario).items() if key not in {"perfil", "senha", "token"}}
-        for usuario in usuarios
-    ]
     return usuarios
 
 
@@ -179,7 +167,7 @@ async def excluir_usuario(inputDto: IdUsuarioDto):
         return None
     pd = ProblemDetailsDto(
         "int",
-        f"O Usuario com id <b>{inputDto.id_usuario}</b> não foi encontrado.",
+        f"O Usuário com id <b>{inputDto.id_usuario}</b> não foi encontrado.",
         "value_not_found",
         ["body", "id_usuario"],
     )

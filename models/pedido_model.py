@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
+from models.item_pedido_model import ItemPedido
+from models.usuario_model import Usuario
 
 
 class EstadoPedido(Enum):
@@ -23,3 +25,5 @@ class Pedido:
     endereco_entrega: Optional[str] = None
     estado: Optional[EstadoPedido] = None
     id_cliente: Optional[int] = None
+    cliente: Optional[Usuario] = None
+    itens: Optional[List[ItemPedido]] = None
