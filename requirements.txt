@@ -11,3 +11,4 @@ mercadopago
 python-dotenv
 mailersend
 pyJWT
+pillow
