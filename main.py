@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from repositories.categoria_repo import CategoriaRepo
 from repositories.usuario_repo import UsuarioRepo
 from repositories.item_pedido_repo import ItemPedidoRepo
 from repositories.pedido_repo import PedidoRepo
@@ -15,6 +16,7 @@ from util.auth_jwt import (
 from util.exceptions import configurar_excecoes
 
 load_dotenv()
+CategoriaRepo.criar_tabela()
 ProdutoRepo.criar_tabela()
 ProdutoRepo.inserir_produtos_json("sql/produtos.json")
 UsuarioRepo.criar_tabela()
