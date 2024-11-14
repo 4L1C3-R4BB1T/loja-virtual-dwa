@@ -71,3 +71,17 @@ class CategoriaRepo:
         except sqlite3.Error as ex:
             print(ex)
             return False
+
+    @classmethod
+    def obter_por_id(cls, id: int) -> Optional[Categoria]:
+        try:
+            with obter_conexao() as conexao:
+                cursor = conexao.cursor()
+                tupla = cursor.execute(SQL_OBTER_POR_ID, (id,)).fetchone()
+                if not tupla:
+                    return None
+                categoria = Categoria(*tupla)
+                return categoria
+        except sqlite3.Error as ex:
+            print(ex)
+            return None

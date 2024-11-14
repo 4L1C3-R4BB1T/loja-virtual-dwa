@@ -8,7 +8,6 @@ from PIL import Image
 from dtos.alterar_categoria_dto import AlterarCategoriaDto
 from dtos.alterar_pedido_dto import AlterarPedidoDto
 from dtos.alterar_produto_dto import AlterarProdutoDto
-from dtos.inserir_categoria_dto import InserirCategoriaDto
 from dtos.inserir_produto_dto import InserirProdutoDto
 from dtos.problem_details_dto import ProblemDetailsDto
 from models.categoria_model import Categoria
@@ -217,8 +216,8 @@ async def excluir_usuario(id_usuario: int = Form(...)):
 
 
 @router.post("/inserir_categoria", status_code=201)
-async def inserir_categoria(inputDto: InserirCategoriaDto) -> Categoria:
-    nova_categoria = Categoria(None, inputDto.descricao)
+async def inserir_categoria(descricao: str = Form(...)) -> Categoria:
+    nova_categoria = Categoria(None, descricao)
     nova_categoria = CategoriaRepo.inserir(nova_categoria)
     return nova_categoria
 
@@ -255,5 +254,20 @@ async def excluir_categoria(id_categoria: int = Form(...)):
         f"O categoria com id <b>{id_categoria}</b> não foi encontrado.",
         "value_not_found",
         ["body", "id_produto"],
+    )
+    return JSONResponse(pd.to_dict(), status_code=404)
+
+
+@router.get("/obter_categoria/{id_categoria}")
+async def obter_categoria(id_categoria: int = Path(..., title="Id da categoria", ge=1)):
+    await asyncio.sleep(SLEEP_TIME)
+    categoria = CategoriaRepo.obter_por_id(id_categoria)
+    if categoria:
+        return categoria
+    pd = ProblemDetailsDto(
+        "int",
+        f"A categoria com id <b>{id_categoria}</b> não foi encontrada.",
+        "value_not_found",
+        ["body", "id"],
     )
     return JSONResponse(pd.to_dict(), status_code=404)

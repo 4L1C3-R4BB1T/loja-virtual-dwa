@@ -25,3 +25,9 @@ SQL_EXCLUIR = """
     DELETE FROM categoria    
     WHERE id=?
 """
+
+SQL_OBTER_POR_ID = """
+    SELECT id, descricao
+    FROM categoria
+    WHERE id=?
+"""
