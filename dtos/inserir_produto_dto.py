@@ -37,6 +37,7 @@ class InserirProdutoDto(BaseModel):
 
     @field_validator("id_categoria")
     def validar_id(cls, v):
-        msg = is_greater_than(v, "Id Categaria", 0)
+        msg = is_not_empty(v, "Id Categoria")
+        msg = msg or is_greater_than(v, "Id Categoria", 0)
         if msg: raise ValueError(msg)
         return v
