@@ -31,3 +31,7 @@ SQL_OBTER_POR_ID = """
     FROM categoria
     WHERE id=?
 """
+
+SQL_OBTER_QUANTIDADE = """
+    SELECT COUNT(*) FROM categoria
+"""

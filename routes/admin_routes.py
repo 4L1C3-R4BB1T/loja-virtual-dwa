@@ -38,13 +38,15 @@ async def inserir_produto(
     preco: float = Form(...),
     descricao: str = Form(...),
     estoque: int = Form(...),
+    id_categoria: int = Form(...),
     imagem: Optional[UploadFile] = File(None)
-):    
+):
     produto_dto = InserirProdutoDto(
         nome=nome,
         preco=preco,
         descricao=descricao,
-        estoque=estoque
+        estoque=estoque,
+        id_categoria=id_categoria
     )
     conteudo_arquivo = await imagem.read()
     imagem = Image.open(BytesIO(conteudo_arquivo))
@@ -58,7 +60,12 @@ async def inserir_produto(
         return JSONResponse(pd.to_dict(), status_code=422)
     await asyncio.sleep(SLEEP_TIME)
     novo_produto = Produto(
-        None, produto_dto.nome, produto_dto.preco, produto_dto.descricao, produto_dto.estoque
+        None,
+        produto_dto.nome,
+        produto_dto.preco,
+        produto_dto.descricao,
+        produto_dto.estoque,
+        produto_dto.id_categoria
     )
     novo_produto = ProdutoRepo.inserir(novo_produto)
     if novo_produto:
@@ -99,7 +106,14 @@ async def obter_produto(id_produto: int = Path(..., title="Id do Produto", ge=1)
 @router.post("/alterar_produto", status_code=204)
 async def alterar_produto(inputDto: AlterarProdutoDto):
     await asyncio.sleep(SLEEP_TIME)
-    produto = Produto(inputDto.id, inputDto.nome, inputDto.preco, inputDto.descricao, inputDto.estoque)
+    produto = Produto(
+        inputDto.id, 
+        inputDto.nome, 
+        inputDto.preco, 
+        inputDto.descricao, 
+        inputDto.estoque, 
+        inputDto.id_categoria
+    )
     if ProdutoRepo.alterar(produto):
         return None
     pd = ProblemDetailsDto(

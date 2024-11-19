@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import sqlite3
 from typing import List, Optional
 from models.categoria_model import Categoria
@@ -85,3 +86,22 @@ class CategoriaRepo:
         except sqlite3.Error as ex:
             print(ex)
             return None
+
+    @classmethod
+    def obter_quantidade(cls) -> Optional[int]:
+        try:
+            with obter_conexao() as conexao:
+                cursor = conexao.cursor()
+                tupla = cursor.execute(SQL_OBTER_QUANTIDADE).fetchone()
+                return int(tupla[0])
+        except sqlite3.Error as ex:
+            print(ex)
+            return None
+
+    @classmethod
+    def inserir_categorias_json(cls, arquivo_json: str):
+        if CategoriaRepo.obter_quantidade() == 0:
+            with open(arquivo_json, "r", encoding="utf-8") as arquivo:
+                categoria = json.load(arquivo)
+                for categoria in categoria:
+                    CategoriaRepo.inserir(Categoria(**categoria))

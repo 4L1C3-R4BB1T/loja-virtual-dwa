@@ -17,6 +17,7 @@ from util.exceptions import configurar_excecoes
 
 load_dotenv()
 CategoriaRepo.criar_tabela()
+CategoriaRepo.inserir_categorias_json("sql/categorias.json")
 ProdutoRepo.criar_tabela()
 ProdutoRepo.inserir_produtos_json("sql/produtos.json")
 UsuarioRepo.criar_tabela()

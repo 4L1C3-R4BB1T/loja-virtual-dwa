@@ -22,7 +22,13 @@ class ProdutoRepo:
                 cursor = conexao.cursor()
                 cursor.execute(
                     SQL_INSERIR,
-                    (produto.nome, produto.preco, produto.descricao, produto.estoque),
+                    (
+                        produto.nome,
+                        produto.preco,
+                        produto.descricao,
+                        produto.estoque,
+                        produto.id_categoria,
+                    ),
                 )
                 if cursor.rowcount > 0:
                     produto.id = cursor.lastrowid
@@ -55,6 +61,7 @@ class ProdutoRepo:
                         produto.preco,
                         produto.descricao,
                         produto.estoque,
+                        produto.id_categoria,
                         produto.id,
                     ),
                 )
@@ -118,6 +125,33 @@ class ProdutoRepo:
                 cursor = conexao.cursor()
                 tuplas = cursor.execute(
                     SQL_OBTER_BUSCA_ORDENADA, (termo, termo, tamanho_pagina, offset)
+                ).fetchall()
+                produtos = [Produto(*t) for t in tuplas]
+                return produtos
+        except sqlite3.Error as ex:
+            print(ex)
+            return None
+
+    @classmethod
+    def obter_por_categoria_busca_(
+        cls, id_categoria: int, pagina: int, tamanho_pagina: int, ordem: int
+    ) -> List[Produto]:
+        termo = "%" + termo + "%"
+        offset = (pagina - 1) * tamanho_pagina
+        match (ordem):
+            case 1:
+                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
+            case 2:
+                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco ASC")
+            case 3:
+                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco DESC")
+            case _:
+                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
+        try:
+            with obter_conexao() as conexao:
+                cursor = conexao.cursor()
+                tuplas = cursor.execute(
+                    SQL_OBTER_BUSCA_ORDENADA, (id_categoria, tamanho_pagina, offset)
                 ).fetchall()
                 produtos = [Produto(*t) for t in tuplas]
                 return produtos

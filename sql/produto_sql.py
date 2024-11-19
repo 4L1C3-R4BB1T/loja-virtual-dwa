@@ -4,23 +4,26 @@ SQL_CRIAR_TABELA = """
         nome TEXT NOT NULL,
         preco FLOAT NOT NULL,
         descricao TEXT NOT NULL,
-        estoque INTEGER NOT NULL)
+        estoque INTEGER NOT NULL,
+        id_categoria INTEGER NOT NULL,
+        FOREIGN KEY (id_categoria) REFERENCES categoria(id))
 """
 
 SQL_INSERIR = """
-    INSERT INTO produto(nome, preco, descricao, estoque)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO produto(nome, preco, descricao, estoque, id_categoria)
+    VALUES (?, ?, ?, ?, ?)
 """
 
 SQL_OBTER_TODOS = """
-    SELECT id, nome, preco, descricao, estoque
-    FROM produto
+    SELECT p.id, p.nome, p.preco, p.descricao, p.estoque, p.id_categoria, c.descricao
+    FROM produto p, categoria c
+    WHERE p.id_categoria=c.id
     ORDER BY nome
 """
 
 SQL_ALTERAR = """
     UPDATE produto
-    SET nome=?, preco=?, descricao=?, estoque=?
+    SET nome=?, preco=?, descricao=?, estoque=?, id_categoria=?
     WHERE id=?
 """
 
@@ -30,9 +33,10 @@ SQL_EXCLUIR = """
 """
 
 SQL_OBTER_UM = """
-    SELECT id, nome, preco, descricao, estoque
-    FROM produto
-    WHERE id=?
+    SELECT p.id, p.nome, p.preco, p.descricao, p.estoque, p.id_categoria, c.descricao
+    FROM produto p, categoria c
+    WHERE p.id=?
+    AND p.id_categoria=c.id
 """
 
 SQL_OBTER_QUANTIDADE = """
@@ -41,7 +45,7 @@ SQL_OBTER_QUANTIDADE = """
 
 SQL_OBTER_BUSCA = """
     SELECT id, nome, preco, descricao, estoque
-    FROM produto
+    FROM produto, id_categoria
     WHERE nome LIKE ? OR descricao LIKE ?
     ORDER BY #1
     LIMIT ? OFFSET ?
@@ -50,4 +54,12 @@ SQL_OBTER_BUSCA = """
 SQL_OBTER_QUANTIDADE_BUSCA = """
     SELECT COUNT(*) FROM produto
     WHERE nome LIKE ? OR descricao LIKE ?
+"""
+
+SQL_OBTER_POR_CATEGORIA_BUSCA = """
+    SELECT id, nome, preco, descricao, estoque
+    FROM produto, id_categoria
+    WHERE id_categoria=?
+    ORDER BY id
+    LIMIT ? OFFSET ?
 """

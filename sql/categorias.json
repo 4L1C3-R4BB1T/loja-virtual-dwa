@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "descricao": "Smartphones"
+    },
+    {
+        "id": 2,
+        "descricao": "Consoles"
+    },
+    {
+        "id": 3,
+        "descricao": "Computadores"
+    },
+    {
+        "id": 4,
+        "descricao": "Smartwatches"
+    },
+    {
+        "id": 5,
+        "descricao": "Fones"
+    },
+    {
+        "id": 6,
+        "descricao": "Eletrônicos"
+    },
+    {
+        "id": 7,
+        "descricao": "Periféricos"
+    }
+]

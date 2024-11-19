@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-
+from models.categoria_model import Categoria
 
 @dataclass
 class Produto():
@@ -9,3 +9,5 @@ class Produto():
     preco: Optional[float] = None
     descricao: Optional[str] = None
     estoque: Optional[int] = None
+    id_categoria: Optional[int] = None
+    categoria: Optional[Categoria] = None

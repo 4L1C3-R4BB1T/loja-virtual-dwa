@@ -8,6 +8,7 @@ class InserirProdutoDto(BaseModel):
     preco: float    
     descricao: str
     estoque: int
+    id_categoria: int
 
     @field_validator("nome")
     def validar_nome(cls, v):
@@ -24,12 +25,18 @@ class InserirProdutoDto(BaseModel):
     @field_validator("descricao")
     def validar_descricao(cls, v):
         msg = is_not_empty(v, "Descrição")
-        msg = msg or is_size_between(v, "Descrição", 16, 1024)
+        msg = msg or is_size_between(v, "Descrição", 6, 1100)
         if msg: raise ValueError(msg)
         return v
 
     @field_validator("estoque")
     def validar_estoque(cls, v):
         msg = is_in_range(v, "Estoque", 0, 1000)
+        if msg: raise ValueError(msg)
+        return v
+
+    @field_validator("id_categoria")
+    def validar_id(cls, v):
+        msg = is_greater_than(v, "Id Categaria", 0)
         if msg: raise ValueError(msg)
         return v
