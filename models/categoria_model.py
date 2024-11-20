@@ -4,5 +4,6 @@ from typing import Optional
 
 @dataclass
 class Categoria:
-    id: Optional[int] = None
+    id: Optional[int]
     descricao: Optional[str] = None
+    cor: Optional[str] = None

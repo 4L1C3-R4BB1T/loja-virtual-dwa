@@ -1,11 +1,13 @@
 import asyncio
 from io import BytesIO
+import json
 from typing import List, Optional
 from fastapi import APIRouter, File, Form, Path, UploadFile
 from fastapi.responses import JSONResponse
 from PIL import Image
+from pydantic import ValidationError
 
-from dtos.alterar_categoria_dto import AlterarCategoriaDto
+from dtos.alterar_ou_criar_categoria_dto import AlterarOuCriarCategoriaDto
 from dtos.alterar_pedido_dto import AlterarPedidoDto
 from dtos.alterar_produto_dto import AlterarProdutoDto
 from dtos.inserir_produto_dto import InserirProdutoDto
@@ -20,16 +22,29 @@ from repositories.pedido_repo import PedidoRepo
 from repositories.produto_repo import ProdutoRepo
 from repositories.usuario_repo import UsuarioRepo
 from util.images import transformar_em_quadrada
-
+import os
+from datetime import datetime
 SLEEP_TIME = 0.2
 router = APIRouter(prefix="/admin", tags=["Administrador"])
 
 
 @router.get("/obter_produtos")
 async def obter_produtos():
-    await asyncio.sleep(SLEEP_TIME)
-    produtos = ProdutoRepo.obter_todos()
-    return produtos
+    try:
+        await asyncio.sleep(SLEEP_TIME)
+
+        def anexar_imagem(alvo: Produto):
+            hasImagemUrl = os.path.exists(os.getcwd() + f'/static/img/produtos/{alvo.id:04d}.jpg')
+            if hasImagemUrl:
+                timestamp = int(datetime.now().timestamp())
+                alvo.imagemUrl = f"{os.getenv('URL_TEST')}/static/img/produtos/{alvo.id:04d}.jpg?timestamp={timestamp}"
+            return alvo
+
+        produtos = list(map(anexar_imagem, ProdutoRepo.obter_todos()))
+        return produtos
+
+    except Exception as err:
+        print(err)
 
 
 @router.post("/inserir_produto", status_code=201)
@@ -41,37 +56,44 @@ async def inserir_produto(
     id_categoria: int = Form(...),
     imagem: Optional[UploadFile] = File(None)
 ):
-    produto_dto = InserirProdutoDto(
-        nome=nome,
-        preco=preco,
-        descricao=descricao,
-        estoque=estoque,
-        id_categoria=id_categoria
-    )
-    conteudo_arquivo = await imagem.read()
-    imagem = Image.open(BytesIO(conteudo_arquivo))
-    if not imagem:
-        pd = ProblemDetailsDto(
-            "imagem",
-            "O arquivo enviado não é uma imagem válida.",
-            "invalid_file",
-            ["body", "imagem"],
+    try:
+        produto_dto = InserirProdutoDto(
+            nome=nome,
+            preco=preco,
+            descricao=descricao,
+            estoque=estoque,
+            id_categoria=id_categoria
         )
-        return JSONResponse(pd.to_dict(), status_code=422)
-    await asyncio.sleep(SLEEP_TIME)
-    novo_produto = Produto(
-        None,
-        produto_dto.nome,
-        produto_dto.preco,
-        produto_dto.descricao,
-        produto_dto.estoque,
-        produto_dto.id_categoria
-    )
-    novo_produto = ProdutoRepo.inserir(novo_produto)
-    if novo_produto:
-        imagem_quadrada = transformar_em_quadrada(imagem)
-        imagem_quadrada.save(f"static/img/produtos/{novo_produto.id:04d}.jpg", "JPEG")
-    return novo_produto
+        if not imagem:
+            pd = ProblemDetailsDto(
+                "imagem",
+                "O arquivo enviado não é uma imagem válida.",
+                "invalid_file",
+                ["body", "imagem"],
+            )
+            return JSONResponse(pd.to_dict(), status_code=422)
+        
+        conteudo_arquivo = await imagem.read()
+        imagem = Image.open(BytesIO(conteudo_arquivo))
+    
+        await asyncio.sleep(SLEEP_TIME)
+        novo_produto = Produto(
+            None,
+            produto_dto.nome,
+            produto_dto.preco,
+            produto_dto.descricao,
+            produto_dto.estoque,
+            produto_dto.id_categoria
+        )
+        novo_produto = ProdutoRepo.inserir(novo_produto)
+        if novo_produto:
+            imagem_quadrada = transformar_em_quadrada(imagem)
+            imagem_quadrada.save(f"static/img/produtos/{novo_produto.id:04d}.jpg", "JPEG")
+        return novo_produto
+    except ValidationError as err: 
+        return JSONResponse(json.loads(err.json()), status_code=400)
+    except Exception as err:
+        print(err)
 
 
 @router.post("/excluir_produto", status_code=204)
@@ -93,7 +115,13 @@ async def obter_produto(id_produto: int = Path(..., title="Id do Produto", ge=1)
     await asyncio.sleep(SLEEP_TIME)
     produto = ProdutoRepo.obter_um(id_produto)
     if produto:
-        return produto
+        def anexar_imagem(alvo: Produto):
+            hasImagemUrl = os.path.exists(os.getcwd() + f'/static/img/produtos/{alvo.id:04d}.jpg')
+            if hasImagemUrl:
+                timestamp = int(datetime.now().timestamp())
+                alvo.imagemUrl = f"{os.getenv('URL_TEST')}/static/img/produtos/{alvo.id:04d}.jpg?timestamp={timestamp}"
+            return alvo
+        return anexar_imagem(produto)
     pd = ProblemDetailsDto(
         "int",
         f"O produto com id <b>{id_produto}</b> não foi encontrado.",
@@ -103,26 +131,44 @@ async def obter_produto(id_produto: int = Path(..., title="Id do Produto", ge=1)
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
-@router.post("/alterar_produto", status_code=204)
-async def alterar_produto(inputDto: AlterarProdutoDto):
-    await asyncio.sleep(SLEEP_TIME)
-    produto = Produto(
-        inputDto.id, 
-        inputDto.nome, 
-        inputDto.preco, 
-        inputDto.descricao, 
-        inputDto.estoque, 
-        inputDto.id_categoria
-    )
-    if ProdutoRepo.alterar(produto):
-        return None
-    pd = ProblemDetailsDto(
-        "int",
-        f"O produto com id <b>{inputDto.id}</b> não foi encontrado.",
-        "value_not_found",
-        ["body", "id"],
-    )
-    return JSONResponse(pd.to_dict(), status_code=404)
+@router.post("/alterar_produto/{id}", status_code=204)
+async def alterar_produto(
+    id: int,
+    nome: str = Form(...),
+    preco: float = Form(...),
+    descricao: str = Form(...),
+    estoque: int = Form(...),
+    id_categoria: int = Form(...),
+    imagem: Optional[UploadFile] = File(None)
+):
+    try:
+        produto = Produto(
+            id, 
+            nome, 
+            preco, 
+            descricao, 
+            estoque, 
+            id_categoria
+        )
+        
+        if ProdutoRepo.alterar(produto):
+            if imagem:
+                print(imagem)
+                conteudo_arquivo = await imagem.read()
+                imagem = Image.open(BytesIO(conteudo_arquivo))
+                imagem_quadrada = transformar_em_quadrada(imagem)
+                imagem_quadrada.save(f"static/img/produtos/{id:04d}.jpg", "JPEG")
+            return JSONResponse({ 'alterado': True })
+        
+        pd = ProblemDetailsDto(
+            "int",
+            f"O produto com id <b>{id}</b> não foi encontrado.",
+            "value_not_found",
+            ["body", "id"],
+        )
+        return JSONResponse(pd.to_dict(), status_code=404)
+    except Exception as err:
+        print(err)
 
 
 @router.post("/alterar_pedido", status_code=204)
@@ -229,52 +275,36 @@ async def excluir_usuario(id_usuario: int = Form(...)):
     return JSONResponse(pd.to_dict(), status_code=404)
 
 
-@router.post("/inserir_categoria", status_code=201)
-async def inserir_categoria(descricao: str = Form(...)) -> Categoria:
-    nova_categoria = Categoria(None, descricao)
-    nova_categoria = CategoriaRepo.inserir(nova_categoria)
-    return nova_categoria
+@router.post("/inserir_categoria", status_code=201, tags= ["Categoria"])
+async def inserir_categoria(record: AlterarOuCriarCategoriaDto) -> Categoria:
+   try:
+        nova_categoria_criada = CategoriaRepo.inserir(Categoria(**record.__dict__))
+        return JSONResponse({ 'criada': nova_categoria_criada != None })
+   except Exception as err:
+       print(err)
 
 
-@router.get("/obter_categorias")
+@router.get("/obter_categorias", tags= ["Categoria"])
 async def obter_categorias():
     await asyncio.sleep(SLEEP_TIME)
     categorias = CategoriaRepo.obter_todos()
     return categorias
 
 
-@router.post("/alterar_categoria", status_code=204)
-async def alterar_categoria(inputDto: AlterarCategoriaDto):
+@router.post("/alterar_categoria", status_code=204, tags= ["Categoria"])
+async def alterar_categoria(inputDto: AlterarOuCriarCategoriaDto):
     await asyncio.sleep(SLEEP_TIME)
-    categoria = Categoria(inputDto.id, inputDto.descricao)
-    if CategoriaRepo.alterar(categoria):
-        return None
-    pd = ProblemDetailsDto(
-        "int",
-        f"A categoria com id <b>{inputDto.id}</b> não foi encontrado.",
-        "value_not_found",
-        ["body", "id"],
-    )
-    return JSONResponse(pd.to_dict(), status_code=404)
+    categoria = Categoria(**inputDto.__dict__)
+    return JSONResponse({ 'alterado': CategoriaRepo.alterar(categoria) })
 
 
-@router.post("/excluir_categoria", status_code=204)
-async def excluir_categoria(id_categoria: int = Form(...)):
-    await asyncio.sleep(SLEEP_TIME)
-    if CategoriaRepo.excluir(id_categoria):
-        return None
-    pd = ProblemDetailsDto(
-        "int",
-        f"O categoria com id <b>{id_categoria}</b> não foi encontrado.",
-        "value_not_found",
-        ["body", "id_produto"],
-    )
-    return JSONResponse(pd.to_dict(), status_code=404)
+@router.delete("/excluir_categoria/{id_categoria}", status_code=204, tags= ["Categoria"])
+async def excluir_categoria(id_categoria: int):
+    return JSONResponse({ 'deletado': CategoriaRepo.excluir(id_categoria) })
 
 
-@router.get("/obter_categoria/{id_categoria}")
+@router.get("/obter_categoria/{id_categoria}", tags= ["Categoria"])
 async def obter_categoria(id_categoria: int = Path(..., title="Id da categoria", ge=1)):
-    await asyncio.sleep(SLEEP_TIME)
     categoria = CategoriaRepo.obter_por_id(id_categoria)
     if categoria:
         return categoria

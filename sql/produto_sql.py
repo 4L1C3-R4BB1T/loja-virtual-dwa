@@ -15,7 +15,7 @@ SQL_INSERIR = """
 """
 
 SQL_OBTER_TODOS = """
-    SELECT p.id, p.nome, p.preco, p.descricao, p.estoque, p.id_categoria, c.descricao
+    SELECT p.id, p.nome, p.preco, p.descricao, p.estoque, p.id_categoria, c.descricao, c.cor
     FROM produto p, categoria c
     WHERE p.id_categoria=c.id
     ORDER BY nome

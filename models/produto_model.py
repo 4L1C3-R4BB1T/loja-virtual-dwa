@@ -10,4 +10,6 @@ class Produto():
     descricao: Optional[str] = None
     estoque: Optional[int] = None
     id_categoria: Optional[int] = None
-    categoria: Optional[Categoria] = None
+    categoria: str = None
+    cor: str = None
+    imagemUrl: str = None

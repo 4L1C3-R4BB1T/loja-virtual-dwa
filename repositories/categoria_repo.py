@@ -24,6 +24,7 @@ class CategoriaRepo:
                     SQL_INSERIR,
                     (
                         categoria.descricao,
+                        categoria.cor
                     ),
                 )
                 if cursor.rowcount > 0:
@@ -54,6 +55,7 @@ class CategoriaRepo:
                     SQL_ALTERAR,
                     (
                         categoria.descricao,
+                        categoria.cor,
                         categoria.id,
                     ),
                 )
@@ -70,7 +72,6 @@ class CategoriaRepo:
                 cursor.execute(SQL_EXCLUIR, (id,))
                 return cursor.rowcount > 0
         except sqlite3.Error as ex:
-            print(ex)
             return False
 
     @classmethod
@@ -102,6 +103,6 @@ class CategoriaRepo:
     def inserir_categorias_json(cls, arquivo_json: str):
         if CategoriaRepo.obter_quantidade() == 0:
             with open(arquivo_json, "r", encoding="utf-8") as arquivo:
-                categoria = json.load(arquivo)
-                for categoria in categoria:
+                categories = json.load(arquivo)
+                for categoria in categories:
                     CategoriaRepo.inserir(Categoria(**categoria))

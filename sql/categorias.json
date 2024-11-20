@@ -1,30 +1,30 @@
 [
     {
-        "id": 1,
-        "descricao": "Smartphones"
+        "descricao": "Smartphones",
+        "cor": "#3498db"  
     },
     {
-        "id": 2,
-        "descricao": "Consoles"
+        "descricao": "Consoles",
+        "cor": "#e74c3c" 
     },
     {
-        "id": 3,
-        "descricao": "Computadores"
+        "descricao": "Computadores",
+        "cor": "#2ecc71" 
     },
     {
-        "id": 4,
-        "descricao": "Smartwatches"
+        "descricao": "Smartwatches",
+        "cor": "#f39c12"  
     },
     {
-        "id": 5,
-        "descricao": "Fones"
+        "descricao": "Fones",
+        "cor": "#8e44ad"  
     },
     {
-        "id": 6,
-        "descricao": "Eletrônicos"
+        "descricao": "Eletrônicos",
+        "cor": "#16a085" 
     },
     {
-        "id": 7,
-        "descricao": "Periféricos"
+        "descricao": "Periféricos",
+        "cor": "#f1c40f"  
     }
 ]

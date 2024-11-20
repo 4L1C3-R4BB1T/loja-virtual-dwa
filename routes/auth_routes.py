@@ -12,11 +12,14 @@ router = APIRouter(prefix="/auth", tags=["Login"])
 
 @router.post("/entrar", status_code=200)
 async def entrar(entrar_dto: EntrarDto):
+    print(entrar_dto)
     usuario = UsuarioRepo.obter_por_email(entrar_dto.email)
+    print(usuario)
     if ((not usuario)
         or (not usuario.senha)
         or (not conferir_senha(entrar_dto.senha, usuario.senha))):
         pd = ProblemDetailsDto("str", f"Credenciais inválidas. Certifique-se de que está cadastrado e de que sua senha está correta.", "value_not_found", ["body", "email", "senha"])
         return JSONResponse(pd.to_dict(), status_code=404)
     token = criar_token(usuario.id, usuario.nome, usuario.email, usuario.perfil)
+    print("TOKEN:" + token)
     return JSONResponse({"token": token}, status_code=200)
