@@ -105,4 +105,4 @@ class CategoriaRepo:
             with open(arquivo_json, "r", encoding="utf-8") as arquivo:
                 categories = json.load(arquivo)
                 for categoria in categories:
-                    CategoriaRepo.inserir(Categoria(**categoria))
+                    CategoriaRepo.inserir(Categoria(None, **categoria))
