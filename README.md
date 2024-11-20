@@ -41,3 +41,12 @@ Acesse o projeto pelo link:
 ```bash
 http://localhost:8000
 ```
+
+---
+
+## 👩‍💼Usuário Teste
+
+```
+email: joao@email.com
+senha: 123aA@
+```
