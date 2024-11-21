@@ -56,11 +56,3 @@ SQL_OBTER_QUANTIDADE_BUSCA = """
     SELECT COUNT(*) FROM produto
     WHERE nome LIKE ? OR descricao LIKE ?
 """
-
-# SQL_OBTER_POR_CATEGORIA_BUSCA = """
-#     SELECT id, nome, preco, descricao, estoque
-#     FROM produto
-#     WHERE id_categoria=?
-#     ORDER BY id
-#     LIMIT ? OFFSET ?
-# """
