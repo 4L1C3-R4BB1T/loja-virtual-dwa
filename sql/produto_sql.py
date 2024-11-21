@@ -17,7 +17,7 @@ SQL_INSERIR = """
 SQL_OBTER_TODOS = """
     SELECT p.id, p.nome, p.preco, p.descricao, p.estoque, p.id_categoria, c.descricao, c.cor
     FROM produto p, categoria c
-    WHERE p.id_categoria=c.id
+    WHERE p.id_categoria = c.id
     ORDER BY nome
 """
 
@@ -44,9 +44,10 @@ SQL_OBTER_QUANTIDADE = """
 """
 
 SQL_OBTER_BUSCA = """
-    SELECT id, nome, preco, descricao, estoque
-    FROM produto, id_categoria
-    WHERE nome LIKE ? OR descricao LIKE ?
+    SELECT p.id, p.nome, p.preco, p.descricao, p.estoque
+    FROM 
+        produto p INNER JOIN categoria c ON c.id  = p.id_categoria
+    WHERE (p.nome LIKE ? OR p.descricao LIKE ?) #2
     ORDER BY #1
     LIMIT ? OFFSET ?
 """
@@ -56,10 +57,10 @@ SQL_OBTER_QUANTIDADE_BUSCA = """
     WHERE nome LIKE ? OR descricao LIKE ?
 """
 
-SQL_OBTER_POR_CATEGORIA_BUSCA = """
-    SELECT id, nome, preco, descricao, estoque
-    FROM produto, id_categoria
-    WHERE id_categoria=?
-    ORDER BY id
-    LIMIT ? OFFSET ?
-"""
+# SQL_OBTER_POR_CATEGORIA_BUSCA = """
+#     SELECT id, nome, preco, descricao, estoque
+#     FROM produto
+#     WHERE id_categoria=?
+#     ORDER BY id
+#     LIMIT ? OFFSET ?
+# """

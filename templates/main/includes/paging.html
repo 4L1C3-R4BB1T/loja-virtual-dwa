@@ -1,21 +1,21 @@
-<div class="d-flex justify-content-start mt-3">
+<div class="d-flex justify-content-between mt-3 w-full align-items-center">
     <nav class="me-3">
         <ul class="pagination mb-0">
             <li class="page-item">
                 <a class="page-link {{ 'disabled' if pagina_atual==1 else '' }}"
-                    href="/buscar?q={{ termo_busca }}&p={{ pagina_atual-1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}">
+                    href="/buscar?q={{ termo_busca }}&p={{ pagina_atual-1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}&id_categoria={{id_categoria}}">
                     <span>&laquo;</span>
                 </a>
             </li>
             {% for i in range(quantidade_paginas) %}
             <li class="page-item">
                 <a class="page-link {{ 'active' if (i+1)==pagina_atual else '' }}"
-                    href="/buscar?q={{ termo_busca }}&p={{ i+1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}">{{ i+1 }}</a>
+                    href="/buscar?q={{ termo_busca }}&p={{ i+1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}&id_categoria={{id_categoria}}">{{ i+1 }}</a>
             </li>
             {% endfor %}
             <li class="page-item">
                 <a class="page-link {{ 'disabled' if pagina_atual==quantidade_paginas else '' }}"
-                    href="/buscar?q={{ termo_busca }}&p={{ pagina_atual+1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}">
+                    href="/buscar?q={{ termo_busca }}&p={{ pagina_atual+1 }}&tp={{ tamanho_pagina }}&o={{ ordem }}&id_categoria={{id_categoria}}">
                     <span>&raquo;</span>
                 </a>
             </li>
@@ -26,11 +26,28 @@
             <input type="hidden" name="p" value="{{ pagina_atual }}">
             <input type="hidden" name="q" value="{{ termo_busca }}">
             <input type="hidden" name="tp" value="{{ tamanho_pagina }}">            
-            <select name="o" class="form-control" onchange="this.form.submit()">
-                <option value="1" {{ 'selected' if ordem == 1 else '' }}>Nome</option>
-                <option value="2" {{ 'selected' if ordem == 2 else '' }}>Menor Preço</option>
-                <option value="3" {{ 'selected' if ordem == 3 else '' }}>Maior Preço</option>
-            </select>
+        
+            <div class="d-flex flex-column gap-2">
+                <span class="fw-bold">Filtros: </span>
+                <span class="d-flex gap-2 align-items-center">
+                    <select name="o" class="form-control" onchange="this.form.submit()">
+                        <option value="1" {{ 'selected' if ordem == 1 else '' }}>Nome</option>
+                        <option value="2" {{ 'selected' if ordem == 2 else '' }}>Menor Preço</option>
+                        <option value="3" {{ 'selected' if ordem == 3 else '' }}>Maior Preço</option>
+                    </select>
+                    <select name="id_categoria" class="form-control" style="min-width: 230px;" onchange="this.form.submit()">
+                        <option value="-1" selected>Exibir todas as categorias</option>
+                        {% for categoria in categorias %}
+                            {% if categoria.id == id_categoria %}
+                                <option selected value="{{ categoria.id }}">{{ categoria.descricao }}</option>
+                            {% else %}
+                                <option value="{{ categoria.id }}">{{ categoria.descricao }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </span>
+            </div>
+        
         </form>
     </div>
 </div>

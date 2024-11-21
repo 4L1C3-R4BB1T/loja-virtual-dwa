@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -8,12 +9,13 @@ from dtos.inserir_usuario_dto import InserirUsuarioDTO
 from models.usuario_model import Usuario
 from repositories.usuario_repo import UsuarioRepo
 from repositories.produto_repo import ProdutoRepo
+from repositories.categoria_repo import CategoriaRepo
 from util.auth_jwt import (conferir_senha, criar_token, obter_hash_senha)
 
 from util.cookies import TEMPO_COOKIE_AUTH, adicionar_cookie_auth, adicionar_mensagem_sucesso
 from util.pydantic import create_validation_errors
 from util.templates import obter_jinja_templates
-
+from datetime import datetime
 
 router = APIRouter(tags=["Principal"], include_in_schema=False)
 
@@ -58,6 +60,9 @@ async def get_cadastro(request: Request):
 async def post_cadastro(cliente_dto: InserirUsuarioDTO):
     cliente_data = cliente_dto.model_dump(exclude={"confirmacao_senha"})
     cliente_data["senha"] = obter_hash_senha(cliente_data["senha"])
+    if not 'perfil' in cliente_data:
+        cliente_data['perfil'] = 1
+
     novo_cliente = UsuarioRepo.inserir(Usuario(**cliente_data))
     if not novo_cliente or not novo_cliente.id:
         raise HTTPException(status_code=400, detail="Erro ao cadastrar cliente.")
@@ -127,19 +132,24 @@ async def get_produto(request: Request, id: int):
 
 
 @router.get("/buscar")
-async def get_buscar(request: Request, q: str, p: int = 1, tp: int = 6, o: int = 1):
-    produtos = ProdutoRepo.obter_busca(q, p, tp, o)
+async def get_buscar(request: Request, q: str, p: int = 1, tp: int = 6, o: int = 1, id_categoria: Optional[int] = None):
+    produtos = ProdutoRepo.obter_busca(q, p, tp, o, None if id_categoria == -1 else id_categoria)
     qtde_produtos = ProdutoRepo.obter_quantidade_busca(q)
     qtde_paginas = math.ceil(qtde_produtos / float(tp))
+    CategoriaRepo.obter_todos()
     return templates.TemplateResponse(
         "pages/buscar.html",
         {
             "request": request,
             "produtos": produtos,
+            "categorias": CategoriaRepo.obter_todos(),
             "quantidade_paginas": qtde_paginas,
             "tamanho_pagina": tp,
             "pagina_atual": p,
             "termo_busca": q,
+            "timestamp": int(datetime.now().timestamp()),
+            "id_categoria": id_categoria,
+            "term": q,
             "ordem": o,
         },
     )

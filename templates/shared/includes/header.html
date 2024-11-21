@@ -45,7 +45,7 @@
                 {%- endif -%}
             </ul>
             <form class="d-flex" role="search" action="/buscar" method="get">
-                <input class="form-control me-2" type="search" placeholder="O que deseja buscar?" name="q">
+                <input value="{{ term }}" class="form-control me-2" type="search" placeholder="O que deseja buscar?" name="q">
                 <button class="btn btn-danger" type="submit">Buscar</button>
             </form>
         </div>

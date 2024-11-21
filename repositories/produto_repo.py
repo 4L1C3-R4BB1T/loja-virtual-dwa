@@ -6,7 +6,8 @@ from sql.produto_sql import *
 from util.database import obter_conexao
 import shutil
 from pathlib import Path
-
+from repositories.categoria_repo import CategoriaRepo
+from random import choice
 
 class ProdutoRepo:
     @classmethod
@@ -107,8 +108,9 @@ class ProdutoRepo:
 
     @classmethod
     def obter_busca(
-        cls, termo: str, pagina: int, tamanho_pagina: int, ordem: int
+        cls, termo: str, pagina: int, tamanho_pagina: int, ordem: int, id_categoria: Optional[int] = None,
     ) -> List[Produto]:
+        categoria_filtro = f'AND p.id_categoria = {id_categoria}' if id_categoria is not None else ''
         termo = "%" + termo + "%"
         offset = (pagina - 1) * tamanho_pagina
         match (ordem):
@@ -123,41 +125,41 @@ class ProdutoRepo:
         try:
             with obter_conexao() as conexao:
                 cursor = conexao.cursor()
+                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_BUSCA_ORDENADA.replace('#2', categoria_filtro)
                 tuplas = cursor.execute(
                     SQL_OBTER_BUSCA_ORDENADA, (termo, termo, tamanho_pagina, offset)
                 ).fetchall()
-                produtos = [Produto(*t) for t in tuplas]
-                return produtos
+                return [Produto(*t) for t in tuplas]
         except sqlite3.Error as ex:
             print(ex)
-            return None
+            return []
 
-    @classmethod
-    def obter_por_categoria_busca_(
-        cls, id_categoria: int, pagina: int, tamanho_pagina: int, ordem: int
-    ) -> List[Produto]:
-        termo = "%" + termo + "%"
-        offset = (pagina - 1) * tamanho_pagina
-        match (ordem):
-            case 1:
-                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
-            case 2:
-                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco ASC")
-            case 3:
-                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco DESC")
-            case _:
-                SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
-        try:
-            with obter_conexao() as conexao:
-                cursor = conexao.cursor()
-                tuplas = cursor.execute(
-                    SQL_OBTER_BUSCA_ORDENADA, (id_categoria, tamanho_pagina, offset)
-                ).fetchall()
-                produtos = [Produto(*t) for t in tuplas]
-                return produtos
-        except sqlite3.Error as ex:
-            print(ex)
-            return None
+    # @classmethod
+    # def obter_por_categoria_busca_(
+    #     cls, id_categoria: int, pagina: int, tamanho_pagina: int, ordem: int
+    # ) -> List[Produto]:
+    #     termo = "%" + termo + "%"
+    #     offset = (pagina - 1) * tamanho_pagina
+    #     match (ordem):
+    #         case 1:
+    #             SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
+    #         case 2:
+    #             SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco ASC")
+    #         case 3:
+    #             SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "preco DESC")
+    #         case _:
+    #             SQL_OBTER_BUSCA_ORDENADA = SQL_OBTER_POR_CATEGORIA_BUSCA.replace("#1", "nome")
+    #     try:
+    #         with obter_conexao() as conexao:
+    #             cursor = conexao.cursor()
+    #             tuplas = cursor.execute(
+    #                 SQL_OBTER_BUSCA_ORDENADA, (id_categoria, tamanho_pagina, offset)
+    #             ).fetchall()
+    #             produtos = [Produto(*t) for t in tuplas]
+    #             return produtos
+    #     except sqlite3.Error as ex:
+    #         print(ex)
+    #         return None
 
     @classmethod
     def obter_quantidade_busca(cls, termo: str) -> Optional[int]:
@@ -175,12 +177,17 @@ class ProdutoRepo:
 
     @classmethod
     def inserir_produtos_json(cls, arquivo_json: str):
-        if ProdutoRepo.obter_quantidade() == 0:
-            with open(arquivo_json, "r", encoding="utf-8") as arquivo:
-                produtos = json.load(arquivo)
-                for produto in produtos:
-                    ProdutoRepo.inserir(Produto(**produto))
-            cls.transferir_imagens("static/img/produtos/inserir", "static/img/produtos")
+        if ProdutoRepo.obter_quantidade() or not CategoriaRepo.obter_quantidade():
+            return 
+        
+        categorias = CategoriaRepo.obter_todos()
+
+        with open(arquivo_json, "r", encoding="utf-8") as arquivo:
+            produtos = json.load(arquivo)
+            for produto in produtos:
+                produto['id_categoria'] = choice(categorias).id
+                ProdutoRepo.inserir(Produto(**produto))
+        cls.transferir_imagens("static/img/produtos/inserir", "static/img/produtos")
 
     @classmethod
     def transferir_imagens(cls, pasta_origem, pasta_destino):

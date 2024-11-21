@@ -3,7 +3,20 @@
 {% block conteudo %}
 <h1 class="display-5"><b>Busca de Produtos</b></h1>
 <hr>
+
+{% if produtos|length != 0 %}
+    {% include "includes/paging.html" %}
+    {% include "includes/grid_produtos.html" %}
+{% endif %}
+
+
 {% include "includes/paging.html" %}
-{% include "includes/grid_produtos.html" %}
-{% include "includes/paging.html" %}
+
+{% if produtos|length == 0 %}
+    <div class="w-100 mt-5">
+        <p class="fw-bold text-center">Não há nenhuma produto a ser exíbido.</p>
+    </div>
+{% endif %}
+
 {% endblock %}
+
