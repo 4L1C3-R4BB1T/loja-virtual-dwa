@@ -50,3 +50,9 @@ http://localhost:8000
 email: joao@email.com
 senha: 123aA@
 ```
+
+---
+
+## 🆕 Adição de Filtragem de Produtos por Categoria
+
+![Busca de Produtos](https://github.com/4L1C3-R4BB1T/loja-virtual-dwa/blob/feature/categories/assets/1.png)
