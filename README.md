@@ -42,6 +42,14 @@ Acesse o projeto pelo link:
 http://localhost:8000
 ```
 
+### 🗎 Swagger
+
+Acesse a documentação swagger pelo link:
+
+```bash
+http://localhost:8000/docs
+```
+
 ---
 
 ## 👩‍💼Usuário Teste
