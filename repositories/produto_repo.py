@@ -148,19 +148,26 @@ class ProdutoRepo:
             print(ex)
             return None
 
+    # @classmethod
+    # def inserir_produtos_json(cls, arquivo_json: str):
+    #     if ProdutoRepo.obter_quantidade() or not CategoriaRepo.obter_quantidade():
+    #         return
+    #     categorias = CategoriaRepo.obter_todos()
+    #     with open(arquivo_json, "r", encoding="utf-8") as arquivo:
+    #         produtos = json.load(arquivo)
+    #         for produto in produtos:
+    #             produto['id_categoria'] = choice(categorias).id
+    #             ProdutoRepo.inserir(Produto(**produto))
+    #     cls.transferir_imagens("static/img/produtos/inserir", "static/img/produtos")
+
     @classmethod
     def inserir_produtos_json(cls, arquivo_json: str):
-        if ProdutoRepo.obter_quantidade() or not CategoriaRepo.obter_quantidade():
-            return 
-        
-        categorias = CategoriaRepo.obter_todos()
-
-        with open(arquivo_json, "r", encoding="utf-8") as arquivo:
-            produtos = json.load(arquivo)
-            for produto in produtos:
-                produto['id_categoria'] = choice(categorias).id
-                ProdutoRepo.inserir(Produto(**produto))
-        cls.transferir_imagens("static/img/produtos/inserir", "static/img/produtos")
+        if ProdutoRepo.obter_quantidade() == 0:
+            with open(arquivo_json, "r", encoding="utf-8") as arquivo:
+                produtos = json.load(arquivo)
+                for produto in produtos:
+                    ProdutoRepo.inserir(Produto(**produto))
+            cls.transferir_imagens("static/img/produtos/inserir", "static/img/produtos")
 
     @classmethod
     def transferir_imagens(cls, pasta_origem, pasta_destino):
