@@ -18,6 +18,20 @@ Clone esse repositório:
 https://github.com/4L1C3-R4BB1T/loja-virtual-dwa.git
 ```
 
+Instale as dependências do projeto:
+
+```bash
+pip install -r .\requirements.txt
+```
+
+### 📟 Terminal 
+
+Execute o comando abaixo para executar o projeto via terminal:
+
+```bash 
+uvicorn main:app --reload --port 8000
+``` 
+
 ### 🐳 Docker 
 
 Execute o comando abaixo para criar e executar o container docker:
