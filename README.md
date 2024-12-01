@@ -30,7 +30,13 @@ Execute o comando abaixo para executar o projeto via terminal:
 
 ```bash 
 uvicorn main:app --reload --port 8000
-``` 
+```
+
+Acesse o projeto pelo link:
+
+```bash
+http://localhost:8000
+```
 
 ### 🐳 Docker 
 
