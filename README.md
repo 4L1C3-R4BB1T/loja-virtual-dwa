@@ -15,7 +15,7 @@ Esse projeto faz parte da disciplina de Desenvolvimento Web Avançado, ministrad
 Clone esse repositório:
 
 ```bash
-https://github.com/4L1C3-R4BB1T/loja-virtual-dwa.git
+git clone https://github.com/4L1C3-R4BB1T/loja-virtual-dwa.git
 ```
 
 Instale as dependências do projeto:
